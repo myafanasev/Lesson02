@@ -1,14 +1,12 @@
 package ru.innotech.lesson02;
 
-import java.lang.reflect.Array;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Stack;
 
 public class Account {
     private String name;
     private Map<Currency, Integer> moneys = new HashMap<>();
-
     private HistoryUndo historyUndo = new HistoryUndo();    // список операций для выполнения отмены
 
     public Account(String name) {
@@ -48,7 +46,7 @@ public class Account {
         moneys.put(currency, value);    // установим новое значение
     }
 
-    public void delMoneys(Currency currency) {
+    private void delMoneys(Currency currency) {
         moneys.remove(currency);
     }
 
@@ -57,9 +55,60 @@ public class Account {
         return "Владелец счета: " + name + ", денежные средства: " + moneys;
     }
 
+    // внутренний класс для отмены
+    private class HistoryUndo {
+        private Stack<Undoable> undos = new Stack<>();
+        private boolean flagUndo = false;
+
+        public boolean isFlagUndo() {
+            return flagUndo;
+        }
+
+        public void setFlagUndo(boolean flagUndo) {
+            this.flagUndo = flagUndo;
+        }
+
+        public void add(Undoable met){
+            undos.push(met);
+        }
+        public Undoable get() {
+            if (undos.size() == 0) throw new RuntimeException("Отсутствуют действия для отмены");
+            return undos.pop();
+        }
+    }
+
     public void undo () {
         historyUndo.setFlagUndo(true); // установим режим выполнения отмены
         historyUndo.get().undoMethod(this);
         historyUndo.setFlagUndo(false); // снимем режим выполнения отмены
+    }
+
+    // внутренний класс для сохранения
+    private class Save implements Saveable {
+        private final String nameSave;
+        private final Map<Currency, Integer> moneysSave;
+
+        public Save(String nameSave, Map<Currency, Integer> moneysSave) {
+            this.nameSave = nameSave;
+            this.moneysSave = new HashMap<>(moneysSave);
+        }
+
+        public Map<Currency, Integer> getMoneysSave() {
+            return new HashMap<>(moneysSave);
+        }
+
+        public String getNameSave() {
+            return nameSave;
+        }
+        public void load() {
+            name = this.getNameSave();
+            moneys = this.getMoneysSave();
+            historyUndo = new HistoryUndo(); // зачищаем историю отмены, так как выполнили восстановление из сохранения
+        }
+    }
+
+    // метод сохранения
+    public Saveable save() {
+        return new Save(name, moneys);
     }
 }
