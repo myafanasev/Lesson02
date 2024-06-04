@@ -72,7 +72,7 @@ public class Account {
             undos.push(met);
         }
         public Undoable get() {
-            if (undos.size() == 0) throw new RuntimeException("Отсутствуют действия для отмены");
+            if (undos.size() == 0) throw new NullPointerException("Отсутствуют действия для отмены");
             return undos.pop();
         }
     }
