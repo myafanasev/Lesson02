@@ -40,11 +40,11 @@ public class Starter {
         System.out.println(account1);
 
         save1.load();
-        System.out.println("Востановление до первого сохранения:");
+        System.out.println("Восстановление до первого сохранения:");
         System.out.println(account1);
 
         save2.load();
-        System.out.println("Востановление до второго сохранения:");
+        System.out.println("Восстановление до второго сохранения:");
         System.out.println(account1);
     }
 }
